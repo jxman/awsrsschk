@@ -1,0 +1,15 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# evironment variables
+env
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride

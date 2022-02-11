@@ -1,0 +1,32 @@
+service: awsrss-backend
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  memorySize: 256
+  timeout: 10
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:Scan
+          Resource: ${file(./env/env.dev.json):ARN_STATUS}
+        - Effect: "Allow"
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+          Resource: ${file(./env/env.dev.json):ARN_SENT}
+          # Resource: ${file(./env/env.${opt:stage,'dev'}.json):ARN_SENT} ** Need to fix **
+
+# region: us-east-1
+
+functions:
+  main:
+    handler: handler.run
+    environment: ${file(./env/env.${opt:stage,'dev'}.json)}
+
+    events:
+      - schedule: rate(1 minute)
