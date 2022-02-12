@@ -15,3 +15,7 @@ NewRelic https://status.newrelic.com/history.rss
 ## AWS Resources used include:
 
 | DynamoDB | Lambda | Event Bridge | Cloudwatch |
+
+## Diagram of the Platform
+
+![demo screenshot](./awsrss.png)
