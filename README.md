@@ -35,9 +35,23 @@ Create 2 DynamoDB tables with the following configs. One table will be used to s
 
 #### Status Table Details
 
+1. From the AWS DynamoDB console click Create Table
+2. Create the table named "awsrss-status-dev"
+3. Create a Partition key named "statusId" and set as a string
+4. Keep all the defaults and click Create Table
+5. Seed the table with the rss sites to monitor. From the DynamoDB menu click on "Tables\ Explore itmes" and select the table you created
+6. Click "Create item" to add the rss feeds you wish to monitor (see below to see list of seed data to use.) **Make sure you use a unique value for the statusId and ensure that the atribute used for the rss feed is named "rssUrl".**
+
 #### Sent Table Details
 
+1. From the AWS DynamoDB console click Create Table
+2. Create the table named "awsrss-sent-dev"
+3. Create a Partition key named "guidItem" and set as a string
+4. Keep all the defaults and click Create Table
+
 ### Environment File setup (evn.xxxx.json)
+
+ENV overview;
 
 ```json
 {
@@ -63,4 +77,17 @@ Sample Data below;
   "ARN_STATUS": "arn:aws:dynamodb:us-east-1:1234567890:table/aswrss-status-dev",
   "ARN_SENT": "arn:aws:dynamodb:us-east-1:1234567890:table/aswrss-sent-dev"
 }
+```
+
+#### Seed Data
+
+```text
+statusId	rssUrl
+Apigee	https://status.apigee.com/history.rss
+Azure	https://azurestatuscdn.azureedge.net/en-us/status/feed/
+CloudFlare	https://www.cloudflarestatus.com/history.rss
+Imperva	https://status.imperva.com/history.rss
+NewRelic	https://status.newrelic.com/history.rss
+Acquia	https://status.acquia.com/history.rss
+AWS	https://status.aws.amazon.com/rss/all.rss
 ```
