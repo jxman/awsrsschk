@@ -27,7 +27,9 @@ The Lambda Function reads from a source list of RSS sites within DynamoDB (see e
 3. Setup your Dynamo-DB tables (see below for more details)
 4. Create a subfolder under root names \env and then create a file named env.dev.json file (see below env file details)
 5. Update the serverless.yml config file with your configs
-6. run the sls deploy command
+6. Config the serverless CLI on your local machine with access to the AWS account you wish to deploy and run the deploy command. See the sls links for detail;
+   https://www.serverless.com/framework/docs
+   https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
 
 ### DynamoDB tables
 
