@@ -12,10 +12,51 @@ CloudFlare https://www.cloudflarestatus.com/history.rss
 Imperva https://status.imperva.com/history.rss
 NewRelic https://status.newrelic.com/history.rss
 
-## AWS Resources used include:
+## AWS Resources used in Project
 
 | DynamoDB | Lambda | Event Bridge | Cloudwatch |
 
 ## Diagram of the Platform
 
 ![demo screenshot](./awsrss.png)
+
+## Install
+
+1. Download folder to your machine
+2. run npm -i
+3. Setup your Dynamo-DB tables (see below for more details)
+4. Create a subfolder under root names \env and then create a file named env.dev.json file (see below env file details)
+5. Update the serverless.yml config file with your configs
+6. run the sls deploy command
+
+### DynamoDB tables
+
+Create 2 DynamoDB tables with the following configs. One table will be used to start rss feeds to monitor and the second will be used to track and record alerts sent.
+
+#### Status Table Details
+
+#### Sent Table Details
+
+### Environment File setup (evn.xxxx.json)
+
+{
+"ENVIRONMENT": "Enviroment to match deployment used in the serverless.yml file",  
+ "PROD_HOOK": "MS Teams channel webhooks to send alerts",
+"DYNAMO_TABLE": "name of the status dynamodb table",
+"DYNAMO_SENT": "name of the sent dynamodb table",
+"DATE_OFFSET": "miliseconds offset to use between alerts to avoid dups. Keep default 600000",
+"ARN_STATUS": "arn of the status dynamodb table",
+"ARN_SENT": "arn of the sent dynamodb table"
+}
+
+Sample Data below;
+
+{
+"ENVIRONMENT": "DEV",  
+ "PROD_HOOK": "https://notified.webhook.office.com/webhookb2/xxxxx9999999000000333",
+"DYNAMO_TABLE": "aswrss-status-dev",
+"DYNAMO_SENT": "aswrss-sent-dev",
+"DATE_OFFSET": "600000",
+"ARN_STATUS": "arn:aws:dynamodb:us-east-1:1234567890:table/aswrss-status-dev",
+"ARN_SENT": "arn:aws:dynamodb:us-east-1:1234567890:table/aswrss-sent-dev"
+}
