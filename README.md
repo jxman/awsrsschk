@@ -6,11 +6,11 @@ A Node.js app written and public to AWS Lambda using the servless framework (<ht
 
 The Lambda Function reads from a source list of RSS sites within DynamoDB (see example below) and then scans each site for any published status update. As the various providers publish updates to their respective sites, the script will capture the update and send the update to a defined webhook. Additionally, the “sent updates” are written to a DynamoDB table used to eliminate duplicate alerts for the same update.
 
-Apigee <https://status.apigee.com/history.rss>
-Azure <https://azurestatuscdn.azureedge.net/en-us/status/feed/>
-CloudFlare <https://www.cloudflarestatus.com/history.rss>
-Imperva <https://status.imperva.com/history.rss>
-NewRelic <https://status.newrelic.com/history.rss>
+*Apigee <https://status.apigee.com/history.rss>
+*Azure <https://azurestatuscdn.azureedge.net/en-us/status/feed/>
+*CloudFlare <https://www.cloudflarestatus.com/history.rss>
+*Imperva <https://status.imperva.com/history.rss>
+\*NewRelic <https://status.newrelic.com/history.rss>
 
 ## AWS Resources used in Project
 
@@ -22,8 +22,8 @@ NewRelic <https://status.newrelic.com/history.rss>
 
 ## Install
 
-1. Download folder to your machine
-2. run npm -i
+1. Download the repo folder to your local machine that is running the latest version of node.js
+2. run npm install
 3. Setup your Dynamo-DB tables (see below for more details)
 4. Create a subfolder under root names \env and then create a file named env.dev.json file (see below env file details)
 5. Update the serverless.yml config file with your configs
