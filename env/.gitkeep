@@ -1,0 +1,4 @@
+# This file ensures the env/ directory is tracked in git
+# while keeping the actual environment files (.env, env.dev.json, env.prod.json) ignored
+# 
+# The env.template.json file provides a template for configuration

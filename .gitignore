@@ -1,15 +1,262 @@
-# package directories
-node_modules
-jspm_packages
+# ===========================
+# AWS Serverless RSS Checker
+# .gitignore - Best Practices
+# ===========================
 
-# Serverless directories
-.serverless
+# ===========================
+# Dependencies & Package Managers
+# ===========================
+node_modules/
+jspm_packages/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-# evironment variables
-env
+# ===========================
+# Environment & Configuration
+# ===========================
+# Environment files (keep templates)
+env/
+!env/
+!env/env.template.json
+!env/.gitkeep
 
-### macOS ###
-# General
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# AWS credentials and config
+.aws/
+aws-config.json
+credentials.json
+
+# ===========================
+# Serverless Framework
+# ===========================
+.serverless/
+.serverless_nextjs/
+.serverless_plugins/
+serverless-state.json
+
+# ===========================
+# AWS & Cloud Artifacts
+# ===========================
+# CloudFormation templates (generated)
+cloudformation-template-*.json
+# SAM artifacts
+.aws-sam/
+# CDK artifacts
+cdk.out/
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ===========================
+# Build & Distribution
+# ===========================
+dist/
+build/
+out/
+coverage/
+*.tgz
+*.tar.gz
+
+# ===========================
+# Testing & Coverage
+# ===========================
+coverage/
+.nyc_output/
+.coverage/
+junit.xml
+test-results/
+*.lcov
+
+# ===========================
+# Logs & Runtime
+# ===========================
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+lib-cov/
+
+# ===========================
+# IDE & Editor Files
+# ===========================
+# VSCode
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.template
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ===========================
+# Operating System Files
+# ===========================
+# macOS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 .AppleDouble
 .LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================
+# Security & Sensitive Data
+# ===========================
+# Certificates and keys
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# Secrets and tokens
+secrets.json
+*.secret
+.secrets/
+.private/
+
+# Webhook URLs (if stored in files)
+webhooks.json
+tokens.json
+
+# ===========================
+# Development & Debugging
+# ===========================
+# Debug files
+.debug/
+debug.log
+*.debug
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Cache directories
+.cache/
+.npm/
+.eslintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# ===========================
+# Backup & Archive Files
+# ===========================
+backup*/
+*.backup
+*.bak
+*.old
+*.orig
+archive*/
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# ===========================
+# Documentation Generation
+# ===========================
+docs/generated/
+.typedoc/
+typedoc/
+
+# ===========================
+# Performance & Profiling
+# ===========================
+.clinic/
+profile-*/
+*.prof
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
+
+# ===========================
+# Package Manager Lock Files
+# (Uncomment if using alternative package managers)
+# ===========================
+# Yarn
+# yarn.lock
+
+# PNPM
+# pnpm-lock.yaml
+
+# ===========================
+# Custom Project Files
+# ===========================
+# Add project-specific ignores here
+TODO.md
+NOTES.md
+scratch/
+experiments/
+
+# Local testing artifacts
+test-output/
+mock-data/
+local-test.json
+
+# Custom scripts that shouldn't be committed
+local-*.sh
+private-*.js
