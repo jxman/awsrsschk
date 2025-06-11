@@ -1,0 +1,22 @@
+{
+  "name": "awsrss-backend",
+  "version": "1.0.0",
+  "description": "AWS RSS Status Checker",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0",
+    "lint": "echo \"No linter configured yet\" && exit 0",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "logs": "serverless logs -f main --tail"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.490.0",
+    "axios": "^1.6.2",
+    "rss-parser": "^3.13.0",
+    "striptags": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

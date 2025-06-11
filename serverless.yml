@@ -1,0 +1,71 @@
+service: awsrss-backend
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  memorySize: 512  # Increased for better performance
+  timeout: 60      # Increased for RSS parsing
+  
+  # Enhanced IAM permissions
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:Scan
+          Resource: ${file(./env/env.${self:provider.stage}.json):ARN_STATUS}
+        - Effect: "Allow"
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+          Resource: ${file(./env/env.${self:provider.stage}.json):ARN_SENT}
+        - Effect: "Allow"
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "arn:aws:logs:*:*:*"
+
+  # Environment variables for better performance
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+
+# Custom variables
+custom:
+  stage: ${opt:stage, 'dev'}
+  
+functions:
+  main:  # Keeping your original function name
+    handler: handler.run
+    name: ${self:service}-${self:custom.stage}-rss-checker
+    description: "Monitors RSS feeds for cloud service status updates"
+    environment: ${file(./env/env.${self:custom.stage}.json)}
+    
+    # Optional: Uncomment to enable scheduled execution
+    # events:
+    #   - schedule:
+    #       rate: rate(10 minutes)
+    #       enabled: true
+    
+    # Prevent overwhelming external APIs
+    reservedConcurrency: 2
+    
+    # Tags for resource management
+    tags:
+      Service: ${self:service}
+      Stage: ${self:custom.stage}
+      Purpose: RSS-Status-Monitor
+
+# CloudFormation resources for better logging
+resources:
+  Resources:
+    # CloudWatch Log Group with retention
+    MainLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:custom.stage}-rss-checker
+        RetentionInDays: 14
