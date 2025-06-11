@@ -3,48 +3,66 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-orange.svg)](https://aws.amazon.com/lambda/)
-[![Serverless Framework](https://img.shields.io/badge/Serverless-Framework-fd5750.svg)](https://www.serverless.com/)
+[![Terraform](https://img.shields.io/badge/Infrastructure-Terraform-623CE4.svg)](https://www.terraform.io/)
 [![DynamoDB](https://img.shields.io/badge/AWS-DynamoDB-blue.svg)](https://aws.amazon.com/dynamodb/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-username/aws-serverless-rss-checker/graphs/commit-activity)
-[![Dependencies](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)]()
 [![Security](https://img.shields.io/badge/security-updated-brightgreen.svg)]()
-[![Code Style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://standardjs.com)
 
-🚨 **Enterprise-grade serverless RSS monitoring application** that tracks cloud service status updates and sends real-time notifications to Microsoft Teams with comprehensive security and reliability features.
+🚨 **Enterprise-grade serverless RSS monitoring application** that tracks cloud service status updates and sends real-time notifications to Microsoft Teams. Built with **Infrastructure as Code** using Terraform for production-ready deployments.
 
 ## 🌟 Features
 
+- **Infrastructure as Code**: Complete Terraform modules for AWS deployment
+- **Multi-Environment Support**: Separate dev/staging/prod configurations
 - **Multi-Provider Monitoring**: Track status from AWS, Azure, CloudFlare, GitHub, and more
-- **Real-Time Notifications**: Instant Microsoft Teams alerts with rich card formatting
-- **Duplicate Prevention**: Smart filtering with DynamoDB deduplication
+- **Real-Time Notifications**: Instant Microsoft Teams alerts with rich formatting
+- **Duplicate Prevention**: Smart filtering with DynamoDB deduplication and TTL cleanup
 - **Serverless Architecture**: Cost-effective AWS Lambda with auto-scaling
 - **Automatic Scheduling**: Configurable polling intervals with EventBridge
 - **Comprehensive Monitoring**: CloudWatch dashboards, alarms, and structured logging
 - **Error Resilience**: Retry logic, graceful failure handling, and comprehensive error reporting
-- **Security First**: Input validation, content sanitization, and secure credential management
-- **Developer Experience**: Professional tooling, templates, and automated deployment
+- **Security First**: IAM least privilege, encryption at rest, and secure credential management
+- **Cost Optimization**: Reserved concurrency, on-demand billing, and automatic cleanup
 
 ## 🏗️ Architecture
 
+### System Overview
 ```
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   EventBridge   │───▶│    Lambda    │───▶│   DynamoDB      │
-│   (Scheduler)   │    │ RSS Checker  │    │  (Status DB)    │
-└─────────────────┘    └──────┬───────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│  External RSS   │    │   EventBridge   │    │   AWS Lambda    │
+│    Sources      │───▶│   (Scheduler)   │───▶│  RSS Checker    │
+│ (AWS, Azure, etc)│    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────┬───────────┘
+                                                     │
+┌─────────────────┐    ┌─────────────────┐          │
+│ Microsoft Teams │◀───│   CloudWatch    │◀─────────┤
+│   (Webhooks)    │    │ Logs & Metrics  │          │
+└─────────────────┘    └─────────────────┘          │
+                                                     │
+┌─────────────────┐    ┌─────────────────┐          │
+│    DynamoDB     │◀───│    DynamoDB     │◀─────────┘
+│  Status Table   │    │  Sent Items     │
+│                 │    │   (TTL Auto     │
+│                 │    │    Cleanup)     │
+└─────────────────┘    └─────────────────┘
                               │
                               ▼
-┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
-│ Microsoft Teams │◀───│  RSS Feeds   │    │   DynamoDB      │
-│   (Webhooks)    │    │  Processing  │───▶│   (Sent DB)     │
-└─────────────────┘    └──────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌──────────────┐
-                       │  CloudWatch  │
-                       │ Monitoring   │
-                       └──────────────┘
+                       ┌─────────────────┐
+                       │   IAM Role      │
+                       │  (Least         │
+                       │  Privilege)     │
+                       └─────────────────┘
 ```
+
+### Data Flow
+1. **EventBridge** triggers Lambda on schedule (10 minutes default)
+2. **Lambda** scans DynamoDB for RSS sources to monitor
+3. **RSS Feeds** are fetched and parsed from external services
+4. **New items** are detected using DynamoDB deduplication
+5. **Notifications** are sent to Microsoft Teams via webhooks
+6. **Logs** are captured in CloudWatch for monitoring
+7. **Cleanup** happens automatically via DynamoDB TTL
 
 ## 📁 Project Structure
 
@@ -57,13 +75,23 @@ aws-serverless-rss-checker/
 │   ├── webhook.js               # Microsoft Teams notifications
 │   ├── dynamoget.js             # DynamoDB read operations
 │   └── dynamoput.js             # DynamoDB write operations
+├── 📁 terraform/                 # Infrastructure as Code
+│   ├── main.tf                  # Core infrastructure
+│   ├── variables.tf             # Input variables
+│   ├── outputs.tf               # Resource outputs
+│   ├── backend.tf               # Remote state configuration
+│   ├── 📁 modules/              # Reusable Terraform modules
+│   │   ├── lambda/              # Lambda function module
+│   │   └── dynamodb/            # DynamoDB tables module
+│   ├── 📁 environments/         # Environment-specific configs
+│   │   ├── dev/terraform.tfvars
+│   │   └── prod/terraform.tfvars
+│   ├── README.md                # Terraform documentation
+│   └── architecture-diagram.svg # Visual architecture diagram
 ├── 📁 env/                       # Environment configuration
 │   ├── .gitkeep                 # Preserves directory in git
 │   └── env.template.json        # Configuration template
-├── 📁 .vscode/                   # Development environment
-│   ├── extensions.json          # Recommended VSCode extensions
-│   └── settings.json.template   # IDE settings template
-├── 📄 serverless.yml            # Infrastructure as Code
+├── 📄 serverless.yml            # Legacy Serverless Framework config
 ├── 📄 package.json              # Dependencies and scripts
 ├── 📄 deploy.sh                 # Automated deployment script
 ├── 📄 .gitignore                # Comprehensive ignore patterns
@@ -76,10 +104,12 @@ aws-serverless-rss-checker/
 
 - **Node.js 18+** and npm
 - **AWS CLI** configured with appropriate permissions
-- **Serverless Framework** CLI (`npm install -g serverless`)
+- **Terraform** >= 1.0 installed
 - **Microsoft Teams** webhook URL
 
-### Installation
+### Installation & Deployment
+
+#### Option 1: Terraform (Recommended)
 
 1. **Clone and setup**:
    ```bash
@@ -88,55 +118,110 @@ aws-serverless-rss-checker/
    npm install
    ```
 
-2. **Configure environment**:
+2. **Configure Terraform backend** (optional but recommended):
    ```bash
-   # Copy template and configure for development
-   cp env/env.template.json env/env.dev.json
+   # Create S3 bucket for state storage
+   aws s3 mb s3://your-terraform-state-bucket-name
    
-   # Edit env/env.dev.json with your actual values:
-   # - Replace YOUR-ACCOUNT-ID with your AWS account ID
-   # - Add your Microsoft Teams webhook URL
-   # - Configure DynamoDB table names and ARNs
+   # Enable versioning
+   aws s3api put-bucket-versioning \
+     --bucket your-terraform-state-bucket-name \
+     --versioning-configuration Status=Enabled
+   
+   # Create DynamoDB table for state locking
+   aws dynamodb create-table \
+     --table-name terraform-state-locks \
+     --attribute-definitions AttributeName=LockID,AttributeType=S \
+     --key-schema AttributeName=LockID,KeyType=HASH \
+     --billing-mode PAY_PER_REQUEST
    ```
 
-3. **Create DynamoDB tables** (see Database Setup section below)
+3. **Configure environment**:
+   ```bash
+   cd terraform
+   
+   # Copy and edit development configuration
+   cp environments/dev/terraform.tfvars.example environments/dev/terraform.tfvars
+   # Edit the file with your actual values:
+   # - teams_webhook_url
+   # - aws_region
+   # - any other customizations
+   ```
 
-4. **Deploy**:
+4. **Deploy infrastructure**:
+   ```bash
+   # Initialize Terraform
+   terraform init
+   
+   # Plan deployment (review changes)
+   terraform plan -var-file="environments/dev/terraform.tfvars"
+   
+   # Deploy to development
+   terraform apply -var-file="environments/dev/terraform.tfvars"
+   ```
+
+5. **Add RSS sources to DynamoDB**:
+   ```bash
+   # AWS Status Feed
+   aws dynamodb put-item \
+     --table-name awsrss-status-dev \
+     --item '{
+       "statusId": {"S": "AWS"},
+       "rssUrl": {"S": "https://status.aws.amazon.com/rss/all.rss"}
+     }'
+   ```
+
+6. **Test deployment**:
+   ```bash
+   # Invoke Lambda function directly
+   aws lambda invoke \
+     --function-name awsrss-dev-rss-checker \
+     --payload '{}' \
+     response.json
+   
+   # View logs
+   aws logs tail /aws/lambda/awsrss-dev-rss-checker --follow
+   ```
+
+#### Option 2: Serverless Framework (Legacy)
+
+1. **Setup and configure**:
+   ```bash
+   npm install -g serverless
+   cp env/env.template.json env/env.dev.json
+   # Edit env/env.dev.json with your actual values
+   ```
+
+2. **Deploy**:
    ```bash
    chmod +x deploy.sh
    ./deploy.sh dev us-east-1
    ```
 
-5. **Test deployment**:
-   ```bash
-   npx serverless invoke -f main --stage dev
-   npx serverless logs -f main --stage dev --tail
-   ```
-
 ## ⚙️ Configuration
 
-### Environment Variables
+### Terraform Variables
 
-Create `env/env.dev.json` and `env/env.prod.json` based on the template:
+Edit `terraform/environments/dev/terraform.tfvars` or `terraform/environments/prod/terraform.tfvars`:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ENVIRONMENT` | Deployment stage | `DEV`, `PROD` |
-| `PROD_HOOK` | Microsoft Teams webhook URL | `https://...webhook.office.com/...` |
-| `TEST_HOOK` | Test webhook URL (optional) | `https://...webhook.office.com/...` |
-| `DYNAMO_TABLE` | RSS sources table name | `awsrss-status-dev` |
-| `DYNAMO_SENT` | Processed items table name | `awsrss-sent-dev` |
-| `DATE_OFFSET` | Time window in milliseconds | `600000` (10 minutes) |
-| `ARN_STATUS` | DynamoDB table ARN for sources | `arn:aws:dynamodb:...` |
-| `ARN_SENT` | DynamoDB table ARN for tracking | `arn:aws:dynamodb:...` |
-| `AWS_REGION` | AWS deployment region | `us-east-1` |
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `teams_webhook_url` | Microsoft Teams webhook URL | `https://...webhook.office.com/...` | Yes |
+| `teams_test_webhook_url` | Test webhook URL | `https://...webhook.office.com/...` | No |
+| `environment` | Environment name | `dev`, `prod` | Yes |
+| `aws_region` | AWS deployment region | `us-east-1` | Yes |
+| `enable_scheduler` | Enable automatic execution | `true`, `false` | No |
+| `schedule_expression` | EventBridge schedule | `rate(10 minutes)` | No |
+| `lambda_timeout` | Function timeout (seconds) | `60` | No |
+| `lambda_memory_size` | Memory allocation (MB) | `512` | No |
+| `log_retention_days` | CloudWatch log retention | `14` | No |
 
 ### RSS Feed Sources
 
-Popular RSS feeds to monitor (add to `DYNAMO_TABLE` DynamoDB table):
+Popular RSS feeds to monitor (automatically added to DynamoDB):
 
-| statusId | rssUrl | Description |
-|----------|--------|-------------|
+| Service | URL | Description |
+|---------|-----|-------------|
 | AWS | https://status.aws.amazon.com/rss/all.rss | Amazon Web Services |
 | Azure | https://azurestatuscdn.azureedge.net/en-us/status/feed/ | Microsoft Azure |
 | CloudFlare | https://www.cloudflarestatus.com/history.rss | Cloudflare CDN |
@@ -145,265 +230,218 @@ Popular RSS feeds to monitor (add to `DYNAMO_TABLE` DynamoDB table):
 | Heroku | https://status.heroku.com/feed | Heroku Platform |
 | Stripe | https://status.stripe.com/history.rss | Stripe Payments |
 | Atlassian | https://status.atlassian.com/history.rss | Atlassian Services |
-| Salesforce | https://status.salesforce.com/instances/na1/history.rss | Salesforce CRM |
 
-## 🗄️ Database Setup
+## 🗄️ Infrastructure Details
 
-### Create DynamoDB Tables
+### AWS Resources Created
 
-#### Status Sources Table
-```bash
-aws dynamodb create-table \
-  --table-name awsrss-status-dev \
-  --attribute-definitions AttributeName=statusId,AttributeType=S \
-  --key-schema AttributeName=statusId,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST \
-  --tags Key=Project,Value=AwsRssChecker Key=Environment,Value=dev
-```
+#### Core Services
+- **AWS Lambda**: RSS processing function with 512MB memory, 60s timeout
+- **DynamoDB Tables**: 
+  - Status table (RSS sources configuration)
+  - Sent items table (duplicate tracking with TTL)
+- **CloudWatch Log Group**: Function logs with configurable retention
+- **IAM Role**: Least privilege execution role
+- **EventBridge Rule**: Optional scheduled triggers
 
-#### Sent Items Tracking Table
-```bash
-aws dynamodb create-table \
-  --table-name awsrss-sent-dev \
-  --attribute-definitions AttributeName=guidItem,AttributeType=S \
-  --key-schema AttributeName=guidItem,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST \
-  --tags Key=Project,Value=AwsRssChecker Key=Environment,Value=dev
-```
+#### Security Features
+- **IAM Least Privilege**: Minimal required permissions for Lambda
+- **DynamoDB Encryption**: Server-side encryption enabled
+- **VPC Support**: Can be deployed in VPC (commented configuration)
+- **Resource Tagging**: Comprehensive tagging strategy for cost tracking
+
+#### Cost Optimization
+- **On-Demand Billing**: DynamoDB pay-per-request pricing
+- **Reserved Concurrency**: Lambda concurrency limited to 2
+- **TTL Cleanup**: Automatic data cleanup (7 days dev, 30 days prod)
+- **Log Retention**: Configurable CloudWatch log retention
 
 ### Database Schema
 
-#### Status Table (`DYNAMO_TABLE`)
-- **Partition Key**: `statusId` (String) - Unique identifier for RSS source
-- **Attributes**: 
-  - `rssUrl` (String) - RSS feed URL to monitor
+#### Status Table
+- **Partition Key**: `statusId` (String) - Unique RSS source identifier
+- **Attributes**: `rssUrl` (String) - RSS feed URL to monitor
 
-#### Sent Table (`DYNAMO_SENT`)
+#### Sent Items Table  
 - **Partition Key**: `guidItem` (String) - RSS item GUID
 - **Attributes**:
   - `latestDate` (String) - Publication date
-  - `statusId` (String) - Source identifier  
-  - `sentDate` (String) - When notification was sent
+  - `statusId` (String) - Source identifier
+  - `sentDate` (String) - Notification timestamp
   - `ttl` (Number) - Auto-cleanup timestamp
 
-### Sample Data
-
-Add RSS sources to your status table:
-
-```bash
-# AWS Status Feed
-aws dynamodb put-item \
-  --table-name awsrss-status-dev \
-  --item '{
-    "statusId": {"S": "AWS"},
-    "rssUrl": {"S": "https://status.aws.amazon.com/rss/all.rss"}
-  }'
-
-# GitHub Status Feed  
-aws dynamodb put-item \
-  --table-name awsrss-status-dev \
-  --item '{
-    "statusId": {"S": "GitHub"},
-    "rssUrl": {"S": "https://www.githubstatus.com/history.rss"}
-  }'
-```
-
-## 🚀 Deployment
+## 🚀 Deployment Options
 
 ### Development Environment
 ```bash
-# Deploy to development
-./deploy.sh dev us-east-1
-
-# Or manually
-npx serverless deploy --stage dev --region us-east-1
+cd terraform
+terraform plan -var-file="environments/dev/terraform.tfvars"
+terraform apply -var-file="environments/dev/terraform.tfvars"
 ```
 
 ### Production Environment
 ```bash
-# Ensure env/env.prod.json is configured
-cp env/env.template.json env/env.prod.json
-# Edit env/env.prod.json with production values
+# Configure production variables
+cp environments/dev/terraform.tfvars environments/prod/terraform.tfvars
+# Edit prod/terraform.tfvars with production settings
 
 # Deploy to production
-./deploy.sh prod us-east-1
+terraform plan -var-file="environments/prod/terraform.tfvars"
+terraform apply -var-file="environments/prod/terraform.tfvars"
 ```
 
-### Enable Scheduled Execution
-Uncomment the events section in `serverless.yml`:
-```yaml
-events:
-  - schedule:
-      rate: rate(10 minutes)
-      enabled: true
+### Multi-Region Deployment
+```bash
+# Deploy to multiple regions
+terraform apply -var-file="environments/prod/terraform.tfvars" -var="aws_region=us-west-2"
+terraform apply -var-file="environments/prod/terraform.tfvars" -var="aws_region=eu-west-1"
 ```
 
-## 📊 Monitoring & Observability
+## 📊 Monitoring & Operations
 
 ### CloudWatch Dashboards
-Access monitoring dashboards in AWS Console:
+Access monitoring through AWS Console:
 - Lambda execution metrics and duration
-- Error rates and success rates
+- Error rates and success rates  
 - DynamoDB read/write capacity and throttling
 - Custom application metrics
 
-### Structured Logging
+### Logging & Debugging
 ```bash
-# Real-time log tailing
-npx serverless logs -f main --stage dev --tail
+# Real-time log monitoring
+aws logs tail /aws/lambda/awsrss-dev-rss-checker --follow
 
-# Filter specific logs
+# Search error logs
 aws logs filter-log-events \
-  --log-group-name /aws/lambda/awsrss-backend-dev-rss-checker \
+  --log-group-name /aws/lambda/awsrss-dev-rss-checker \
   --filter-pattern "ERROR"
 
-# Search by time range
-aws logs filter-log-events \
-  --log-group-name /aws/lambda/awsrss-backend-dev-rss-checker \
-  --start-time $(date -d '1 hour ago' +%s)000
+# Get function configuration
+aws lambda get-function-configuration \
+  --function-name awsrss-dev-rss-checker
 ```
 
 ### Performance Metrics
 - **Target Execution Time**: < 30 seconds
 - **Error Rate**: < 1%
 - **Memory Usage**: Optimized for 512MB
-- **Concurrent Executions**: Limited to 2 (prevents API overwhelming)
+- **Concurrent Executions**: Limited to 2
 
-## 🔧 Development
+## 🧪 Testing & Validation
 
-### VSCode Setup (Recommended)
+### Infrastructure Testing
 ```bash
-# Copy VSCode settings template
-cp .vscode/settings.json.template .vscode/settings.json
+# Validate Terraform configuration
+terraform validate
 
-# Install recommended extensions (VSCode will prompt)
-# Extensions include: AWS Toolkit, YAML support, ESLint integration
+# Plan without applying
+terraform plan -var-file="environments/dev/terraform.tfvars"
+
+# Test Lambda function
+aws lambda invoke \
+  --function-name awsrss-dev-rss-checker \
+  --payload '{}' \
+  response.json && cat response.json
 ```
 
-### Local Development
+### Application Testing
 ```bash
-# Install Serverless Offline for local testing
-npm install -g serverless-offline
-
-# Run locally (when configured)
-npx serverless offline start
-```
-
-### Code Quality
-```bash
-npm run lint                # Code linting
-npm test                   # Run tests
-npm run deploy:dev         # Deploy to development
-npm run logs              # View logs
-```
-
-## 🧪 Testing
-
-### Manual Testing
-```bash
-# Test Lambda function directly
-npx serverless invoke -f main --stage dev
-
-# Test with custom payload
-echo '{}' | npx serverless invoke -f main --stage dev --data
-```
-
-### Validation Scripts
-```bash
-# Check environment configuration
-node -e "console.log(JSON.stringify(require('./env/env.dev.json'), null, 2))"
-
 # Test DynamoDB connectivity
 aws dynamodb scan --table-name awsrss-status-dev --limit 1
 
 # Validate webhook URL
-curl -X POST "$PROD_HOOK" \
+curl -X POST "$TEAMS_WEBHOOK_URL" \
   -H "Content-Type: application/json" \
   -d '{"text": "Test notification from RSS Checker"}'
+
+# Test RSS feed accessibility
+curl -I "https://status.aws.amazon.com/rss/all.rss"
 ```
 
 ## 🚨 Troubleshooting
 
-### Common Issues & Solutions
+### Common Infrastructure Issues
 
-#### 1. Environment Configuration Errors
+#### 1. Terraform State Issues
 ```bash
-# Problem: Environment file not found
-# Solution: Copy template and configure
-cp env/env.template.json env/env.dev.json
-# Edit the file with your actual values
+# Problem: State file conflicts
+# Solution: Configure remote state backend
+terraform init -backend-config="bucket=your-state-bucket"
 ```
 
-#### 2. DynamoDB Permission Errors
+#### 2. Permission Errors
 ```bash
-# Problem: AccessDenied on DynamoDB operations
-# Solution: Verify IAM permissions and table ARNs
-aws iam get-role --role-name awsrss-backend-dev-us-east-1-lambdaRole
+# Problem: IAM permission denied
+# Solution: Verify AWS credentials and policies
+aws sts get-caller-identity
+terraform plan # Will show specific permission issues
 ```
 
-#### 3. Webhook Delivery Failures
+#### 3. Resource Conflicts
 ```bash
-# Problem: Teams notifications not working
-# Solution: Test webhook URL manually
-curl -X POST "YOUR_WEBHOOK_URL" \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Test message"}'
+# Problem: Resource already exists
+# Solution: Import existing resources or use different names
+terraform import aws_dynamodb_table.status_table awsrss-status-dev
 ```
 
-#### 4. RSS Parsing Errors
+### Application Issues
+
+#### 1. Lambda Timeout
 ```bash
-# Problem: Feed parsing failures
-# Solution: Test RSS feed accessibility
-curl -I "https://status.aws.amazon.com/rss/all.rss"
+# Problem: Function exceeds timeout
+# Solution: Increase timeout in terraform/variables.tf
+variable "lambda_timeout" {
+  default = 120  # Increase from 60
+}
+```
+
+#### 2. DynamoDB Throttling
+```bash
+# Problem: Read/write capacity exceeded
+# Solution: Check metrics and consider provisioned billing
+aws cloudwatch get-metric-statistics \
+  --namespace AWS/DynamoDB \
+  --metric-name ReadThrottleEvents \
+  --dimensions Name=TableName,Value=awsrss-status-dev
 ```
 
 ### Debug Commands
 ```bash
-# View Lambda configuration
-aws lambda get-function-configuration \
-  --function-name awsrss-backend-dev-rss-checker
+# Infrastructure status
+terraform show
+terraform output
 
-# Check CloudWatch logs
+# Application logs
 aws logs describe-log-groups \
-  --log-group-name-prefix "/aws/lambda/awsrss-backend"
+  --log-group-name-prefix "/aws/lambda/awsrss"
 
-# Test DynamoDB table access
-aws dynamodb describe-table --table-name awsrss-status-dev
+# Resource inspection
+aws lambda list-functions --max-items 20
+aws dynamodb list-tables
 ```
 
-## 🔒 Security Features
+## 🔒 Security & Compliance
 
-### Data Protection
-- **Environment Variables**: Sensitive configuration secured
+### Security Features
+- **IAM Least Privilege**: Minimal required permissions only
+- **Encryption at Rest**: DynamoDB tables encrypted
+- **Encryption in Transit**: All API calls use HTTPS
 - **Input Validation**: RSS content sanitized before processing
-- **Content Limits**: Message size limits prevent Teams API issues
 - **Error Sanitization**: No sensitive data in error messages
+- **Resource Isolation**: Separate environments and resources
 
-### AWS Security
-- **IAM Least Privilege**: Minimal required permissions
-- **VPC Deployment**: Optional VPC isolation
-- **Encryption**: Data encrypted at rest and in transit
-- **Access Logging**: CloudTrail integration
+### Compliance Considerations
+- **Logging**: All actions logged in CloudWatch
+- **Audit Trail**: CloudTrail integration available
+- **Data Retention**: Configurable log and data retention
+- **Access Control**: IAM-based access management
 
 ### Best Practices Implemented
 - Secure dependency management
 - Regular security updates
-- Input sanitization
-- Error handling without data leakage
-
-## 📈 Performance Optimizations
-
-### Lambda Configuration
-- **Runtime**: Node.js 20.x (latest LTS)
-- **Memory**: 512 MB (optimized for RSS parsing)
-- **Timeout**: 60 seconds (allows for slow RSS feeds)
-- **Reserved Concurrency**: 2 (prevents API rate limiting)
-
-### Efficiency Features
-- **Connection Reuse**: AWS SDK connection pooling
-- **Consistent Reads**: DynamoDB data accuracy
-- **Efficient Queries**: Optimized database operations
-- **Smart Caching**: Duplicate prevention logic
+- Input sanitization and validation
+- Comprehensive error handling
+- Infrastructure as Code for consistency
 
 ## 🤝 Contributing
 
@@ -411,47 +449,28 @@ aws dynamodb describe-table --table-name awsrss-status-dev
 1. Fork the repository
 2. Clone your fork: `git clone <your-fork-url>`
 3. Install dependencies: `npm install`
-4. Copy environment template: `cp env/env.template.json env/env.dev.json`
-5. Configure your development environment
+4. Configure Terraform: `cp terraform/environments/dev/terraform.tfvars.example terraform/environments/dev/terraform.tfvars`
+5. Initialize infrastructure: `cd terraform && terraform init`
 6. Create feature branch: `git checkout -b feature/your-feature`
 
-### Contribution Guidelines
-- Follow existing code style and structure
-- Add tests for new functionality
-- Update documentation for changes
-- Test thoroughly in development environment
-- Submit pull request with clear description
+### Infrastructure Changes
+- Test changes in development environment first
+- Update documentation for any new variables or outputs
+- Follow Terraform best practices and formatting
+- Include both Terraform and application testing
 
 ### Code Standards
 - Use ES6+ JavaScript features
 - Follow existing error handling patterns
 - Include comprehensive logging
-- Maintain backward compatibility
+- Maintain Infrastructure as Code principles
+- Test thoroughly before submitting
 
-## 📊 Project Statistics
+## 📊 Architecture Diagram
 
-![GitHub repo size](https://img.shields.io/github/repo-size/your-username/aws-serverless-rss-checker)
-![GitHub last commit](https://img.shields.io/github/last-commit/your-username/aws-serverless-rss-checker)
-![GitHub issues](https://img.shields.io/github/issues/your-username/aws-serverless-rss-checker)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/your-username/aws-serverless-rss-checker)
-
-## 🙋‍♂️ Support & Resources
-
-### Documentation
-- **Setup Guide**: This README
-- **API Documentation**: Inline code comments
-- **Architecture**: See diagrams above
-- **Troubleshooting**: See troubleshooting section
-
-### Community
-- **Issues**: [GitHub Issues](https://github.com/your-username/aws-serverless-rss-checker/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/aws-serverless-rss-checker/discussions)
-- **Wiki**: [Project Wiki](https://github.com/your-username/aws-serverless-rss-checker/wiki)
-
-### Monitoring
-- **CloudWatch**: Lambda and DynamoDB metrics
-- **X-Ray**: Distributed tracing (when enabled)
-- **CloudTrail**: API call logging
+For a detailed visual representation of the AWS architecture, see:
+- **Visual Diagram**: `terraform/architecture-diagram.svg`
+- **Terraform Documentation**: `terraform/README.md`
 
 ## 📄 License
 
@@ -459,31 +478,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🏷️ Tags
 
-`aws` `lambda` `serverless` `rss` `monitoring` `nodejs` `dynamodb` `microsoft-teams` `cloudwatch` `status-monitoring` `enterprise` `security` `reliability`
+`aws` `terraform` `infrastructure-as-code` `lambda` `serverless` `rss` `monitoring` `nodejs` `dynamodb` `microsoft-teams` `cloudwatch` `status-monitoring` `enterprise` `security` `multi-environment`
 
 ---
 
 ## 🚀 Quick Commands Reference
 
 ```bash
-# Setup
-cp env/env.template.json env/env.dev.json
-npm install
-chmod +x deploy.sh
+# Infrastructure Setup (Terraform)
+cd terraform
+terraform init
+terraform plan -var-file="environments/dev/terraform.tfvars"
+terraform apply -var-file="environments/dev/terraform.tfvars"
 
-# Deploy
+# Application Testing
+aws lambda invoke --function-name awsrss-dev-rss-checker --payload '{}' response.json
+aws logs tail /aws/lambda/awsrss-dev-rss-checker --follow
+
+# Infrastructure Management
+terraform output
+terraform destroy -var-file="environments/dev/terraform.tfvars"
+
+# Legacy Serverless Framework
 ./deploy.sh dev us-east-1
-
-# Test
 npx serverless invoke -f main --stage dev
-npx serverless logs -f main --stage dev --tail
-
-# Monitor
-aws logs filter-log-events --log-group-name /aws/lambda/awsrss-backend-dev-rss-checker
 ```
 
 ---
 
-**Made with ❤️ for reliable enterprise cloud service monitoring**
+**Built with ❤️ using Infrastructure as Code for reliable enterprise cloud service monitoring**
 
-### 🌟 Star this repository if it helped you monitor your cloud services!
+### 🌟 Star this repository if it helped you build scalable cloud monitoring infrastructure!
