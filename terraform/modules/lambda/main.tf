@@ -7,10 +7,13 @@ resource "aws_lambda_function" "this" {
   runtime         = var.runtime
   timeout         = var.timeout
   memory_size     = var.memory_size
-  
+
   source_code_hash = var.source_code_hash
-  
+
   reserved_concurrency = var.reserved_concurrency
+
+  # KMS encryption for environment variables
+  kms_key_arn = var.kms_key_arn
 
   environment {
     variables = var.environment_variables
@@ -30,7 +33,8 @@ resource "aws_lambda_function" "this" {
 resource "aws_cloudwatch_log_group" "function_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
-  
+  kms_key_id        = var.cloudwatch_kms_key_id
+
   tags = var.tags
 }
 

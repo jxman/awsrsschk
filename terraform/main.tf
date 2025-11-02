@@ -31,6 +31,20 @@ data "aws_caller_identity" "current" {}
 # Data source for current region
 data "aws_region" "current" {}
 
+# KMS keys for encryption at rest
+module "kms" {
+  source = "./modules/kms"
+
+  project_name = var.project_name
+  environment  = var.environment
+  account_id   = data.aws_caller_identity.current.account_id
+  region       = data.aws_region.current.name
+
+  tags = {
+    Purpose = "Encryption-Keys"
+  }
+}
+
 # Lambda function deployment package
 data "archive_file" "lambda_zip" {
   type        = "zip"
@@ -62,9 +76,13 @@ module "lambda" {
   runtime          = var.lambda_runtime
   timeout          = var.lambda_timeout
   memory_size      = var.lambda_memory_size
-  
+
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  # KMS encryption for environment variables and logs
+  kms_key_arn           = module.kms.lambda_key_arn
+  cloudwatch_kms_key_id = module.kms.cloudwatch_logs_key_id
 
   environment_variables = {
     ENVIRONMENT   = upper(var.environment)
@@ -123,12 +141,15 @@ module "dynamodb" {
 
   # Status table configuration
   status_table_name = "${var.project_name}-status-${var.environment}"
-  
-  # Sent items table configuration  
+
+  # Sent items table configuration
   sent_table_name = "${var.project_name}-sent-${var.environment}"
-  
+
   # TTL configuration for sent items (7 days default)
   sent_table_ttl_days = var.sent_table_ttl_days
+
+  # KMS encryption
+  kms_key_arn = module.kms.dynamodb_key_arn
 
   tags = {
     Purpose = "RSS-Status-Storage"
@@ -139,6 +160,7 @@ module "dynamodb" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${module.lambda.function_name}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = module.kms.cloudwatch_logs_key_id
 
   tags = {
     Purpose = "RSS-Status-Logging"

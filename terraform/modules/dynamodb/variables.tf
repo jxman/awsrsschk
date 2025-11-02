@@ -59,6 +59,12 @@ variable "enable_encryption" {
   default     = true
 }
 
+variable "kms_key_arn" {
+  description = "ARN of the KMS key for DynamoDB table encryption (uses AWS managed key if not provided)"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

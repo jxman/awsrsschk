@@ -19,9 +19,10 @@ resource "aws_dynamodb_table" "status_table" {
     enabled = var.enable_point_in_time_recovery
   }
 
-  # Server-side encryption
+  # Server-side encryption with KMS CMK
   server_side_encryption {
-    enabled = var.enable_encryption
+    enabled     = var.enable_encryption
+    kms_key_arn = var.kms_key_arn
   }
 
   tags = merge(var.tags, {
@@ -58,9 +59,10 @@ resource "aws_dynamodb_table" "sent_table" {
     enabled = var.enable_point_in_time_recovery
   }
 
-  # Server-side encryption
+  # Server-side encryption with KMS CMK
   server_side_encryption {
-    enabled = var.enable_encryption
+    enabled     = var.enable_encryption
+    kms_key_arn = var.kms_key_arn
   }
 
   tags = merge(var.tags, {

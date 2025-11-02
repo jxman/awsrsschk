@@ -260,3 +260,6 @@ local-test.json
 # Custom scripts that shouldn't be committed
 local-*.sh
 private-*.js
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

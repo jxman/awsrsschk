@@ -70,6 +70,18 @@ variable "log_retention_days" {
   default     = 14
 }
 
+variable "kms_key_arn" {
+  description = "ARN of the KMS key for Lambda environment variable encryption"
+  type        = string
+  default     = null
+}
+
+variable "cloudwatch_kms_key_id" {
+  description = "ID of the KMS key for CloudWatch Logs encryption"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
