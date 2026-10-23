@@ -11,8 +11,8 @@
     "logs": "serverless logs -f main --tail"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.490.0",
-    "axios": "^1.13.1",
+    "@aws-sdk/client-dynamodb": "^3.1156.0",
+    "axios": "^1.20.0",
     "rss-parser": "^3.13.0",
     "striptags": "^3.2.0"
   },
